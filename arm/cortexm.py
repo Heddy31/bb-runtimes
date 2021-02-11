@@ -840,6 +840,10 @@ stm32_board_configuration = {
                           'STM32_HSE_Clock_Frequency': '8_000_000',
                           'STM32_FLASH_Latency': '5'},
 
+    'nucleo_l432kc':     {'STM32_Main_Clock_Frequency': '80_000_000',
+                          'STM32_HSE_Clock_Frequency': '8_000_000',
+                          'STM32_FLASH_Latency': '5'},
+
     'feather_stm32f405': {'STM32_Main_Clock_Frequency': '168_000_000',
                           'STM32_HSE_Clock_Frequency': '12_000_000',
                           'STM32_FLASH_Latency': '5'},
@@ -895,6 +899,8 @@ class Stm32(ArmV7MTarget):
     def cortex(self):
         if self.mcu.startswith('stm32f4'):
             return 'cortex-m4'
+        elif self.mcu.startswith('stm32l4'):
+            return 'cortex-m4'
         elif self.mcu.startswith('stm32f7'):
             return 'cortex-m7'
         else:
@@ -923,6 +929,8 @@ class Stm32(ArmV7MTarget):
             self.mcu = 'stm32f40x'
         elif self.board in ['nucleo_f401re']:
             self.mcu = 'stm32f401'
+        elif self.board in ['nucleo_l432kc']:
+            self.mcu = 'stm32l4x2'
         elif self.board in ['stm32f429disco', 'openmv2']:
             self.mcu = 'stm32f429x'
         elif self.board in ['stm32f469disco']:
@@ -964,6 +972,9 @@ class Stm32(ArmV7MTarget):
 
         elif self.mcu in ['stm32f401']:
             self.add_gnat_source('arm/stm32/stm32f401/s-stm32.adb')
+
+        elif self.mcu in ['stm32l4x2']:
+            self.add_gnat_source('arm/stm32/stm32l4x2/s-stm32.adb')
 
         elif self.mcu in ['stm32f429x',
                           'stm32f469x']:

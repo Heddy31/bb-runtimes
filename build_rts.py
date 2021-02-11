@@ -93,6 +93,8 @@ def build_configs(target):
         t = Stm32(target)
     elif target == 'nucleo_f401re':
         t = Stm32(target)
+    elif target == 'nucleo_l432kc':
+        t = Stm32(target)
     elif target == 'openmv2':
         t = Stm32(target)
     elif target == 'tms570':

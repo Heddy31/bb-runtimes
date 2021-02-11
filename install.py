@@ -23,6 +23,7 @@ def usage():
 
 
 ALL_BSP = {'arm-eabi': ['stm32f4', 'nucleo_f401re', 'stm32f429disco',
+                        'nucleo_l432kc',
                         'stm32f469disco',
                         'stm32f746disco', 'stm32756geval', 'stm32f769disco',
                         'samg55', 'sam4s', 'samv71', 'openmv2', 'rpi2',
