@@ -10,10 +10,10 @@
 --             Copyright (C) 2003-2005 The European Space Agency            --
 --                     Copyright (C) 2003-2021, AdaCore                     --
 --                                                                          --
--- GNARL is free software; you can  redistribute it  and/or modify it under --
+-- GNAT is free software;  you can  redistribute it  and/or modify it under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
 -- ware  Foundation;  either version 3,  or (at your option) any later ver- --
--- sion. GNARL is distributed in the hope that it will be useful, but WITH- --
+-- sion.  GNAT is distributed in the hope that it will be useful, but WITH- --
 -- OUT ANY WARRANTY;  without even the  implied warranty of MERCHANTABILITY --
 -- or FITNESS FOR A PARTICULAR PURPOSE.                                     --
 --                                                                          --
@@ -26,8 +26,8 @@
 -- see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see    --
 -- <http://www.gnu.org/licenses/>.                                          --
 --                                                                          --
--- GNARL was developed by the GNARL team at Florida State University.       --
--- Extensive contributions were provided by Ada Core Technologies, Inc.     --
+-- GNAT was originally developed  by the GNAT team at  New York University. --
+-- Extensive contributions were provided by Ada Core Technologies Inc.      --
 --                                                                          --
 -- The port of GNARL to bare board targets was initially developed by the   --
 -- Real-Time Systems Group at the Technical University of Madrid.           --
@@ -36,40 +36,42 @@
 
 --  This package defines basic parameters used by the low level tasking system
 
---  This is the x86-64 version of this package
+--  This is the STM32L562 Discovery Board version of this package
 
-pragma Restrictions (No_Elaboration_Code);
+with System.STM32;
+with System.BB.Board_Parameters;
+with System.BB.MCU_Parameters;
 
 package System.BB.Parameters is
-   pragma Pure;
+   pragma No_Elaboration_Code_All;
+   pragma Preelaborate (System.BB.Parameters);
 
-   --------------------
-   -- Hardware clock --
-   --------------------
+   Clock_Frequency : constant := Board_Parameters.Main_Clock_Frequency;
 
-   Ticks_Per_Second : constant := 1_000_000_000;
-   --  On x86-64 we read the TSC frequency from the CPU and convert that time
-   --  to nanoseconds.
+   pragma Compile_Time_Error
+     (Clock_Frequency not in System.STM32.SYSCLK_Range,
+        "bad Clock_Frequency value");
 
-   TSC_Frequency : constant := 0;
-   --  The frequency of the Time Stamp Clock (TSC) in Hertz. When set to zero
-   --  the runtime will attempt to determine its value from the processor's
-   --  internal registers following the guidelines provided by the Intel 64 and
-   --  IA-32 Architectures Software Developer's Manual, Volume 3B, Section
-   --  18.7.3. Since the TSC clock source is implemented differently across
-   --  the different Intel chip families, on some certain processors the
-   --  runtime may fail to either determine the TSC frequency or will set it
-   --  incorrectly. In the former case the runtime will raise a Program_Error
-   --  on boot, while for the latter always check to ensure the timing
-   --  behaviour is as expected. In both cases you will need to manual set the
-   --  TSC_Frequency constant above.
+   Ticks_Per_Second : constant := Clock_Frequency;
 
-   APIC_Timer_Divider : constant := 16;
-   --  Since the timer frequency is typically in GHz, clock the timer down as
-   --  we do not need such a fine grain timer capable of firing every
-   --  nanosecond (which also means the longest delay we can have before
-   --  having to reset the 32-bit timer is ~ 1 second). Instead we aim for
-   --  microsecond granularity.
+   HSE_Clock : constant := Board_Parameters.HSE_Clock_Frequency;
+   --  Note that the HSE might not be mounted!
+
+   MSI_Clock : constant := Board_Parameters.MSI_Clock_Frequency;
+
+   Has_FPU : constant Boolean := True;
+   --  Set to true if core has a FPU
+
+   Has_VTOR : constant Boolean := True;
+   --  Set to true if core has a Vector Table Offset Register (VTOR).
+   --  VTOR is implemented in Cortex-M0+, Cortex-M4 and above.
+
+   Has_OS_Extensions : constant Boolean := True;
+   --  Set to true if core has armv6-m OS extensions (PendSV, MSP, PSP,
+   --  etc...). The OS extensions are optional for the Cortex-M1.
+
+   Is_ARMv6m : constant Boolean := False;
+   --  Set to true if core is an armv6-m (Cortex-M0, Cortex-M0+, Cortex-M1)
 
    ----------------
    -- Interrupts --
@@ -78,27 +80,48 @@ package System.BB.Parameters is
    --  These definitions are in this package in order to isolate target
    --  dependencies.
 
-   subtype Interrupt_Range is Natural range 0 .. 255;
-   --  Number of interrupts supported by the Local APIC
+   subtype Interrupt_Range is Integer
+     range -1 .. MCU_Parameters.Number_Of_Interrupts;
+   --  Number of interrupts for the interrupt controller
+
+   Trap_Vectors : constant := 17;
+   --  While on this target there is little difference between interrupts
+   --  and traps, we consider the following traps:
+   --
+   --    Name                        Nr
+   --
+   --    Reset_Vector                 1
+   --    NMI_Vector                   2
+   --    Hard_Fault_Vector            3
+   --    Mem_Manage_Vector            4
+   --    Bus_Fault_Vector             5
+   --    Usage_Fault_Vector           6
+   --    SVC_Vector                  11
+   --    Debug_Mon_Vector            12
+   --    Pend_SV_Vector              14
+   --    Sys_Tick_Vector             15
+   --    Interrupt_Request_Vector    16
+   --
+   --  These trap vectors correspond to different low-level trap handlers in
+   --  the run time. Note that as all interrupt requests (IRQs) will use the
+   --  same interrupt wrapper, there is no benefit to consider using separate
+   --  vectors for each.
+
+   Context_Buffer_Capacity : constant := 10;
+   --  The context buffer contains registers r4 .. r11 and the SP_process
+   --  (PSP). The size is rounded up to an even number for alignment
 
    ------------
    -- Stacks --
    ------------
 
-   Interrupt_Stack_Frame_Size : constant := 8 * 1024;  --  bytes
-   --  Size of the interrupt stack used for handling an interrupt.
-
-   Interrupt_Stack_Size : constant :=
-     Interrupt_Stack_Frame_Size *
-       (Interrupt_Priority'Last - Interrupt_Priority'First + 1);
-   --  Total size of the interrupt stack per processor. Each processor
-   --  allocates an individual interrupt stack frame for each priority level.
+   Interrupt_Stack_Size : constant := 2 * 1024;
+   --  Size of each of the interrupt stacks in bytes. While there nominally is
+   --  an interrupt stack per interrupt priority, the entire space is used as a
+   --  single stack.
 
    Interrupt_Sec_Stack_Size : constant := 128;
    --  Size of the secondary stack for interrupt handlers
-
-   Exception_Stack_Size : constant := 4096; -- bytes
-   --  Size for each processor exception stack.
 
    ----------
    -- CPUS --

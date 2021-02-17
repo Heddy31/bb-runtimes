@@ -2,11 +2,7 @@
 --                                                                          --
 --                         GNAT RUN-TIME COMPONENTS                         --
 --                                                                          --
---                    I N T E R F A C E S . X 8 6 _ 6 4                     --
---                                                                          --
---                                 S p e c                                  --
---                                                                          --
---          Copyright (C) 2020-2021, Free Software Foundation, Inc.         --
+--          Copyright (C) 2012-2021, Free Software Foundation, Inc.         --
 --                                                                          --
 -- GNAT is free software;  you can  redistribute it  and/or modify it under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
@@ -29,14 +25,10 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with Interfaces;
+pragma Suppress (All_Checks);
 
-package Interfaces.X86_64 with Pure, No_Elaboration_Code_All is
+procedure Setup_PLL;
 
-   type IO_Port is new Interfaces.Unsigned_16;
-
-   function Read_IO_Byte (Port : IO_Port) return Interfaces.Unsigned_8
-     with Inline;
-   procedure Write_IO_Byte (Data : Interfaces.Unsigned_8; Port : IO_Port)
-     with Inline;
-end Interfaces.X86_64;
+pragma No_Elaboration_Code_All (Setup_PLL);
+--  This code is executed before elaboration, so better not need elaboration
+--  code.

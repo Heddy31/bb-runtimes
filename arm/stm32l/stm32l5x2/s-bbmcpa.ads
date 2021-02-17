@@ -1,12 +1,12 @@
 ------------------------------------------------------------------------------
 --                                                                          --
---                         GNAT RUN-TIME COMPONENTS                         --
+--                  GNAT RUN-TIME LIBRARY (GNARL) COMPONENTS                --
 --                                                                          --
---                    I N T E R F A C E S . X 8 6 _ 6 4                     --
+--              S Y S T E M . B B . M C U _ P A R A M E T E R S             --
 --                                                                          --
---                                 S p e c                                  --
+--                                  S p e c                                 --
 --                                                                          --
---          Copyright (C) 2020-2021, Free Software Foundation, Inc.         --
+--                     Copyright (C) 2016-2021, AdaCore                     --
 --                                                                          --
 -- GNAT is free software;  you can  redistribute it  and/or modify it under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
@@ -27,16 +27,26 @@
 -- GNAT was originally developed  by the GNAT team at  New York University. --
 -- Extensive contributions were provided by Ada Core Technologies Inc.      --
 --                                                                          --
+-- The port of GNARL to bare board targets was initially developed by the   --
+-- Real-Time Systems Group at the Technical University of Madrid.           --
+--                                                                          --
 ------------------------------------------------------------------------------
 
-with Interfaces;
+--  This package defines MCU parameters for the STM32F40x family
 
-package Interfaces.X86_64 with Pure, No_Elaboration_Code_All is
+with Interfaces.STM32;
+with Interfaces.STM32.PWR;
 
-   type IO_Port is new Interfaces.Unsigned_16;
+package System.BB.MCU_Parameters is
 
-   function Read_IO_Byte (Port : IO_Port) return Interfaces.Unsigned_8
-     with Inline;
-   procedure Write_IO_Byte (Data : Interfaces.Unsigned_8; Port : IO_Port)
-     with Inline;
-end Interfaces.X86_64;
+   pragma No_Elaboration_Code_All;
+   pragma Preelaborate;
+
+   Number_Of_Interrupts : constant := 108;
+
+   procedure PWR_Overdrive_Enable;
+
+   function Is_PWR_Stabilized return Boolean
+     is (Interfaces.STM32.PWR.PWR_Periph.SR2.VOSF = False);
+
+end System.BB.MCU_Parameters;
