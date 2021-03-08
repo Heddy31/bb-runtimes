@@ -1014,13 +1014,19 @@ class Stm32lCommonArchSupport(ArchSupport):
         self.add_linker_script('arm/stm32l/common-ROM.ld', loader='ROM')
 
         self.add_gnat_sources(
-            'src/s-bbpara__stm32l5.ads',
+            #'src/s-bbpara__stm32l5.ads',
             'arm/stm32l/s-stm32.ads',
             'arm/stm32l/start-rom.S',
             'arm/stm32l/start-ram.S',
             'arm/stm32l/start-common.S',
             'arm/stm32l/setup_pll.adb',
             'arm/stm32l/setup_pll.ads')
+        
+        # if board in ['stm32l562disco']:
+        #     self.add_gnat_source('src/s-bbpara__stm32l5.ads')
+        # elif board in ['nucleo_l432kc']:
+        self.add_gnat_source('src/s-bbpara__stm32l4.ads')
+        
 
 
 class Stm32l(ArmV7MTarget):
@@ -1049,6 +1055,8 @@ class Stm32l(ArmV7MTarget):
     def cortex(self):
         if self.mcu.startswith('stm32l5'):
             return 'cortex-m33'
+        elif self.mcu.startswith('stm32l4'):
+            return 'cortex-m4'
         else:
             assert False, "Unexpected MCU %s" % self.mcu
 
@@ -1078,6 +1086,8 @@ class Stm32l(ArmV7MTarget):
         self.board = board
         if self.board in ['stm32l562disco']:
             self.mcu = 'stm32l5x2'
+        elif self.board in ['nucleo_l432kc']:
+            self.mcu = 'stm32l4x2'
         else:
             assert False, "Unknown stm32l board: %s" % self.board
 
@@ -1109,6 +1119,8 @@ class Stm32l(ArmV7MTarget):
 
         if self.mcu in ['stm32l5x2']:
             self.add_gnat_source('arm/stm32l/stm32l5x2/s-stm32.adb')
+        elif self.mcu in ['stm32l4x2']:
+            self.add_gnat_source('arm/stm32l/stm32l4x2/s-stm32.adb')
 
         # ravenscar support
         self.add_gnarl_sources(

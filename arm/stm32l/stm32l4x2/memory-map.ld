@@ -30,11 +30,11 @@
 
 MEMORY
 {
-  flash   (rx) : ORIGIN = 0x08000000, LENGTH = 256K
-  sram12 (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
+  flash (rx) : ORIGIN = 0x08000000, LENGTH = 256K
+  sram (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
 }
 
-REGION_ALIAS("sram_tx", sram12)
-REGION_ALIAS("sram_ro", sram12)
-REGION_ALIAS("sram_bs", sram12)
-REGION_ALIAS("sram_da", sram12)
+REGION_ALIAS("sram_tx", sram)
+REGION_ALIAS("sram_ro", sram)
+REGION_ALIAS("sram_bs", sram)
+REGION_ALIAS("sram_da", sram)

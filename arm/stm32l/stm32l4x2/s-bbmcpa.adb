@@ -4,9 +4,9 @@
 --                                                                          --
 --              S Y S T E M . B B . M C U _ P A R A M E T E R S             --
 --                                                                          --
---                                  S p e c                                 --
+--                                  B o d y                                 --
 --                                                                          --
---                      Copyright (C) 2016, AdaCore                         --
+--                     Copyright (C) 2016-2021, AdaCore                     --
 --                                                                          --
 -- GNAT is free software;  you can  redistribute it  and/or modify it under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
@@ -15,8 +15,13 @@
 -- OUT ANY WARRANTY;  without even the  implied warranty of MERCHANTABILITY --
 -- or FITNESS FOR A PARTICULAR PURPOSE.                                     --
 --                                                                          --
--- You should have received a copy of the GNU General Public License along  --
--- with this library; see the file COPYING3. If not, see:                   --
+-- As a special exception under Section 7 of GPL version 3, you are granted --
+-- additional permissions described in the GCC Runtime Library Exception,   --
+-- version 3.1, as published by the Free Software Foundation.               --
+--                                                                          --
+-- You should have received a copy of the GNU General Public License and    --
+-- a copy of the GCC Runtime Library Exception along with this program;     --
+-- see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see    --
 -- <http://www.gnu.org/licenses/>.                                          --
 --                                                                          --
 -- GNAT was originally developed  by the GNAT team at  New York University. --
@@ -27,24 +32,17 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
---  This package defines MCU parameters for the STM32F40x family
+with Interfaces.STM32.PWR; use Interfaces.STM32.PWR;
 
-with Interfaces.STM32.PWR;
-with Interfaces.Bit_Types;
+package body System.BB.MCU_Parameters is
 
-package System.BB.MCU_Parameters is
-   pragma No_Elaboration_Code_All;
-   pragma Preelaborate;
-   use type Interfaces.Bit_Types.Bit;
+   --------------------------
+   -- PWR_Overdrive_Enable --
+   --------------------------
 
-   Number_Of_Interrupts : constant := 84;
-
-   procedure PWR_Initialize;
-
-   procedure PWR_Overdrive_Enable;
-
-   function Is_PWR_Stabilized return Boolean
-          is (True);
---     is (Interfaces.STM32.PWR.PWR_Periph.CSR.VOSRDY = 1);
+   procedure PWR_Overdrive_Enable is
+   begin
+      null;
+   end PWR_Overdrive_Enable;
 
 end System.BB.MCU_Parameters;
